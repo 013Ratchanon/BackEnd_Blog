@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { Schema, post } = mongoose;
+const { Schema, model } = mongoose;
 const PostSchema = new Schema(
   {
     title: { type: String, required: true },
@@ -13,5 +13,5 @@ const PostSchema = new Schema(
   }
 );
 
-const PostModel = post("Post", PostSchema);
+const PostModel = model("Post", PostSchema);
 module.exports = PostModel;
