@@ -1,9 +1,12 @@
 const PostModel = require("../models/Post");
 const Post = require("../models/Post");
+const { post } = require("../routers/post.router");
 
 exports.createPost = async (req, res) => {
-  const { title, summary, content, cover, author } = req.body;
-  if (!title || !summary || !content || !cover || !author) {
+  const { title, summary, content, cover } = req.body;
+  const authorId = req.authorId;
+  console.log("Author ID from token:", authorId);
+  if (!title || !summary || !content || !cover) {
     return res
       .status(400)
       .send({ message: "Please provide all required fields" });
@@ -14,7 +17,7 @@ exports.createPost = async (req, res) => {
       summary,
       content,
       cover,
-      author,
+      author: authorId,
     });
     if (!postDoc) {
       return res.status(500).send({ message: "Cannot a new create post" });
@@ -48,7 +51,7 @@ exports.getAllPosts = async (req, res) => {
 exports.getPostById = async (req, res) => {
   const id = req.params.id;
   if (!id) {
-    return res.status(400).send({ message: "Id is missing" });
+    return res.status(400).send({ message: "Post Id is missing" });
   }
   try {
     const post = await PostModel.findById(id)
@@ -97,26 +100,35 @@ exports.updatePostById = async (req, res) => {
     return res.status(400).send({ message: "Id is missing" });
   }
   const { title, summary, content, cover } = req.body;
+  const authorId = req.authorId;
   if (!title || !summary || !content || !cover) {
     return res
       .status(400)
       .send({ message: "Please provide all required fields" });
   }
   try {
-    const postDoc = await PostModel.findByIdAndUpdate(
-      id,
-      {
-        title,
-        summary,
-        content,
-        cover,
-      },
-      { new: true }
-    );
+    const postDoc = await PostModel.findOne({
+      _id: id,
+      author: authorId,
+    });
     if (!postDoc) {
-      return res.status(500).send({ message: "Cannot update the post" });
+      return res
+        .status(404)
+        .send({ message: "Post with this author id is not found" });
     }
-    res.send({ message: "Post updated successfully", data: postDoc });
+    if (!postDoc.length == 0) {
+      return res.status(403).send({
+        message:
+          "Unauthorized to edit this post,because you are not the author",
+      });
+    } else {
+      postDoc.title = title;
+      postDoc.summary = summary;
+      postDoc.content = content;
+      postDoc.cover = cover;
+      await postDoc.save();
+      res.send({ message: "Post updated successfully", data: postDoc });
+    }
   } catch (error) {
     res.status(500).send({
       message: error.message || "Some errors occurred while updating the post",
@@ -126,6 +138,7 @@ exports.updatePostById = async (req, res) => {
 
 exports.deletePostById = async (req, res) => {
   const id = req.params.id;
+  const authorId = req.authorId;
   if (!id) {
     return res.status(400).send({ message: "Id is missing" });
   }
@@ -134,8 +147,10 @@ exports.deletePostById = async (req, res) => {
     if (!postDoc) {
       return res.status(500).send({ message: "Cannot delete the post" });
     }
-    res.send({ message: "Post deleted successfully", data: postDoc });
+    res.send({ message: "Post deleted successfully" });
   } catch (error) {
+    middleware;
+
     res.status(500).send({
       message: error.message || "Some errors occurred while deleting the post",
     });
