@@ -98,41 +98,43 @@ exports.getByAuthorId = async (req, res) => {
 };
 
 exports.updatePostById = async (req, res) => {
-  const id = req.params.id;
-  if (!id) {
-    return res.status(400).send({ message: "Id is missing" });
-  }
-  const { title, summary, content, cover } = req.body;
-  const authorId = req.authorId;
-  if (!title || !summary || !content || !cover) {
-    return res
-      .status(400)
-      .send({ message: "Please provide all required fields" });
-  }
   try {
-    const postDoc = await PostModel.findOne({
-      _id: id,
-      author: authorId,
-    });
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).send({ message: "Id is missing" });
+    }
+
+    const { title, summary, content } = req.body;
+    const authorId = req.authorId;
+
+    if (!title || !summary || !content) {
+      return res
+        .status(400)
+        .send({ message: "Please provide title, summary, and content" });
+    }
+
+    // หาโพสต์โดย id + author
+    const postDoc = await PostModel.findOne({ _id: id, author: authorId });
     if (!postDoc) {
       return res
         .status(404)
-        .send({ message: "Post with this author id is not found" });
+        .send({ message: "Post not found or you are not the author" });
     }
-    if (!postDoc.length == 0) {
-      return res.status(403).send({
-        message:
-          "Unauthorized to edit this post,because you are not the author",
-      });
-    } else {
-      postDoc.title = title;
-      postDoc.summary = summary;
-      postDoc.content = content;
-      postDoc.cover = cover;
-      await postDoc.save();
-      res.send({ message: "Post updated successfully", data: postDoc });
+
+    // อัปเดต fields
+    postDoc.title = title;
+    postDoc.summary = summary;
+    postDoc.content = content;
+
+    // ถ้ามีไฟล์ใหม่จาก Firebase
+    if (req.file && req.file.firebaseUrl) {
+      postDoc.cover = req.file.firebaseUrl;
     }
+
+    await postDoc.save();
+    res.send({ message: "Post updated successfully", data: postDoc });
   } catch (error) {
+    console.error("Update post error:", error);
     res.status(500).send({
       message: error.message || "Some errors occurred while updating the post",
     });

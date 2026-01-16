@@ -17,20 +17,21 @@ const firebaseStorage = getStorage(app);
 //set storage engine
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 1000000 }, // 1MB
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
   },
-}).single("file");
+}).single("cover");
 
 function checkFileType(file, cb) {
   const fileTypes = /jpeg|jpg|png|gif|webp/;
   const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
   const mimeType = fileTypes.test(file.mimetype);
+
   if (mimeType && extName) {
     return cb(null, true);
   } else {
-    cb("Error: Image Only!");
+    return cb(new Error("Error: Image Only!"));
   }
 }
 

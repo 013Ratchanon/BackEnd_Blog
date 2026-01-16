@@ -23,7 +23,13 @@ router.get("/", postController.getAllPosts);
 router.get("/:id", postController.getPostById);
 
 // update post
-router.put("/:id", authJwt.verifyToken, postController.updatePostById);
+router.put(
+  "/:id",
+  authJwt.verifyToken,
+  upload, // Multer middleware รับไฟล์
+  uploadToFirebase, // upload ไป Firebase
+  postController.updatePostById
+);
 
 // delete post
 router.delete("/:id", authJwt.verifyToken, postController.deletePostById);
