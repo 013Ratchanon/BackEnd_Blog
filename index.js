@@ -18,6 +18,9 @@ app.get("/", (req, res) => {
   res.send("<h1>Welcome to SE NPRU Blog Restful API</h1>");
 });
 
+// const upload = multer({ storage: multer.memoryStorage() });
+// app.use(upload.single("file"));
+
 if (!DB_URL) {
   console.error("DB_URL is missing. Please set it in the .env file....");
 } else {

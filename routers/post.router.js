@@ -2,9 +2,16 @@ const express = require("express");
 const router = express.Router();
 const postController = require("../controllers/post.controller");
 const authJwt = require("../middleware/authJwt.middleware");
+const { upload, uploadToFirebase } = require("../middleware/file.middleware");
 
 // create post
-router.post("/create", authJwt.verifyToken, postController.createPost);
+router.post(
+  "/create",
+  authJwt.verifyToken,
+  upload,
+  uploadToFirebase,
+  postController.createPost
+);
 
 // get posts by author
 router.get("/author/:id", postController.getByAuthorId);

@@ -3,10 +3,13 @@ const Post = require("../models/Post");
 const { post } = require("../routers/post.router");
 
 exports.createPost = async (req, res) => {
-  const { title, summary, content, cover } = req.body;
+  if (!req.file) {
+    return res.status(400).json({ message: "Image is required" });
+  }
+  const { title, summary, content } = req.body;
   const authorId = req.authorId;
   console.log("Author ID from token:", authorId);
-  if (!title || !summary || !content || !cover) {
+  if (!title || !summary || !content) {
     return res
       .status(400)
       .send({ message: "Please provide all required fields" });
@@ -16,7 +19,7 @@ exports.createPost = async (req, res) => {
       title,
       summary,
       content,
-      cover,
+      cover: req.file.firebaseUrl,
       author: authorId,
     });
     if (!postDoc) {
