@@ -8,7 +8,7 @@ const { upload, uploadToFirebase } = require("../middleware/file.middleware");
 router.post(
   "/create",
   authJwt.verifyToken,
-  upload,
+  upload.single("file"),
   uploadToFirebase,
   postController.createPost
 );
