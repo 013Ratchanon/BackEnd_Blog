@@ -21,7 +21,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
   },
-}).single("cover");
+}).single("file");
 
 function checkFileType(file, cb) {
   const fileTypes = /jpeg|jpg|png|gif|webp/;
