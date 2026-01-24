@@ -1,37 +1,43 @@
 const express = require("express");
 const router = express.Router();
+
 const postController = require("../controllers/post.controller");
 const authJwt = require("../middleware/authJwt.middleware");
-const { upload, uploadToFirebase } = require("../middleware/file.middleware");
 
-// create post
+// 👉 import multer instance
+const upload = require("../middlewares/multer");
+
+// 👉 import firebase upload middleware
+const { uploadToFirebase } = require("../middleware/file.middleware");
+
+// ================= CREATE POST =================
 router.post(
   "/create",
   authJwt.verifyToken,
-  upload.single("file"),
+  upload.single("file"), // ✅ ใช้ multer ตัวเดียว
   uploadToFirebase,
   postController.createPost
 );
 
-// get posts by author
+// ================= GET =================
 router.get("/author/:id", postController.getByAuthorId);
-
-// get all posts
 router.get("/", postController.getAllPosts);
-
-// get post by id
 router.get("/:id", postController.getPostById);
 
-// update post
+// ================= UPDATE =================
 router.put(
   "/:id",
   authJwt.verifyToken,
-  upload, // Multer middleware รับไฟล์
-  uploadToFirebase, // upload ไป Firebase
+  upload.single("file"), // ✅ ต้องระบุ .single ด้วย
+  uploadToFirebase,
   postController.updatePostById
 );
 
-// delete post
-router.delete("/:id", authJwt.verifyToken, postController.deletePostById);
+// ================= DELETE =================
+router.delete(
+  "/:id",
+  authJwt.verifyToken,
+  postController.deletePostById
+);
 
 module.exports = router;
