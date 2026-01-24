@@ -3,12 +3,7 @@ const router = express.Router();
 
 const postController = require("../controllers/post.controller");
 const authJwt = require("../middleware/authJwt.middleware");
-
-// 👉 import multer instance
-const upload = require("../middlewares/multer");
-
-// 👉 import firebase upload middleware
-const { uploadToFirebase } = require("../middleware/file.middleware");
+const { upload, uploadToFirebase } = require("../middleware/file.middleware");
 
 // ================= CREATE POST =================
 router.post(
